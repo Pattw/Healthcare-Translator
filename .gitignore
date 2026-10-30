@@ -1,0 +1,23 @@
+# Environment secrets & API keys
+.env
+*.env
+
+# Python runtime & virtual environments
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# System & OS metadata
+.DS_Store
+Thumbs.db
+~$*
+
+# Research documents & reference spreadsheets
+docs/Research/
+
+# Frontend prototypes (keeping root coverage_check.html tracked)
+frontend/Prototypes/
+
+# Scratch notes
+presentquick.txt
