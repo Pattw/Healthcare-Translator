@@ -1,0 +1,23 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.14.7, pytest-9.2.0, pluggy-1.7.0 -- /Users/patryktwardus/Desktop/Healthcare-Translator/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/patryktwardus/Desktop/Healthcare-Translator/backend
+plugins: anyio-4.15.1
+collecting ... collected 14 items
+
+tests/test_adjudication.py::test_tc_calc_01_unmet_deductible_absorption PASSED [  7%]
+tests/test_adjudication.py::test_tc_calc_02_split_deductible_and_coinsurance PASSED [ 14%]
+tests/test_adjudication.py::test_tc_calc_03_out_of_pocket_max_clamp PASSED [ 21%]
+tests/test_adjudication.py::test_preventive_aca_zero_cost PASSED         [ 28%]
+tests/test_adjudication.py::test_flat_copay_service PASSED               [ 35%]
+tests/test_api.py::test_api_get_patients_catalog PASSED                  [ 42%]
+tests/test_api.py::test_api_get_procedures_catalog PASSED                [ 50%]
+tests/test_api.py::test_api_evaluate_coverage_valid_claim PASSED         [ 57%]
+tests/test_api.py::test_api_evaluate_coverage_preventive PASSED          [ 64%]
+tests/test_api.py::test_api_err_01_invalid_procedure_code PASSED         [ 71%]
+tests/test_api.py::test_api_err_02_invalid_patient_id PASSED             [ 78%]
+tests/test_prior_auth.py::test_tc_pa_01_prior_auth_required_with_checklist PASSED [ 85%]
+tests/test_prior_auth.py::test_tc_pa_02_preventive_care_exemption PASSED [ 92%]
+tests/test_prior_auth.py::test_unmapped_procedure_rule_fallback PASSED   [100%]
+
+============================== 14 passed in 1.50s ==============================
