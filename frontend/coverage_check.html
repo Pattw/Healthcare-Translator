@@ -1,202 +1,792 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Coverage check</title>
-<style>
-:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
---bg1:#c5d1dd;--bg2:#e3e9f0;--glass:rgba(255,255,255,.58);--glass2:rgba(255,255,255,.75);--edge:rgba(255,255,255,.85);--shadow:rgba(50,70,100,.10);
---text:#1b1f26;--muted:#4a5563;--line:rgba(60,80,110,.16);--accent:#2f6bed;--onaccent:#fff;--bar0:rgba(70,90,120,.35);--track:rgba(60,80,110,.13);
---ok:#1f7a45;--warn:#8a5a00;--warnbg:rgba(240,170,40,.2);--okbg:rgba(50,170,100,.18);--nbg:rgba(90,110,140,.16)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#0e131a;--bg2:#1a2331;--glass:rgba(255,255,255,.07);--glass2:rgba(255,255,255,.11);--edge:rgba(255,255,255,.14);--shadow:rgba(0,0,0,.35);--text:#f1f4f8;--muted:#a9b4c3;--line:rgba(255,255,255,.14);--accent:#6b9bff;--onaccent:#0b1220;--bar0:rgba(255,255,255,.3);--track:rgba(255,255,255,.12);--ok:#6fd49a;--warn:#f2bb55;--warnbg:rgba(240,170,40,.18);--okbg:rgba(80,200,130,.16);--nbg:rgba(255,255,255,.1)}}
-:root[data-theme="dark"]{--bg1:#0e131a;--bg2:#1a2331;--glass:rgba(255,255,255,.07);--glass2:rgba(255,255,255,.11);--edge:rgba(255,255,255,.14);--shadow:rgba(0,0,0,.35);--text:#f1f4f8;--muted:#a9b4c3;--line:rgba(255,255,255,.14);--accent:#6b9bff;--onaccent:#0b1220;--bar0:rgba(255,255,255,.3);--track:rgba(255,255,255,.12);--ok:#6fd49a;--warn:#f2bb55;--warnbg:rgba(240,170,40,.18);--okbg:rgba(80,200,130,.16);--nbg:rgba(255,255,255,.1)}
-*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;min-height:100vh;background:var(--bg2) linear-gradient(160deg,var(--bg1),var(--bg2) 50%,var(--bg1)) fixed;color:var(--text);font:16px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
-.panel{max-width:1180px;margin:24px auto;padding:24px;border-radius:40px;background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);box-shadow:0 12px 40px var(--shadow)}
-.glass{background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 6px 24px var(--shadow);border-radius:28px}
-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:28px}
-.nav{display:flex;align-items:center;gap:10px;padding:6px 8px 6px 10px;border-radius:999px}
-.nav b{min-height:44px;padding:0 20px;display:inline-flex;align-items:center;border-radius:999px;background:var(--glass2);font-size:15px;font-weight:600;box-shadow:0 1px 3px var(--shadow)}
-.pill{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;font-size:14px;font-weight:600;background:var(--glass2);border:1px solid var(--edge)}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}.stale .dot{background:var(--warn)}
-h1,h2,h3,p{margin:0}h2{font-size:22px;letter-spacing:-.4px;font-weight:600}
-.sub{color:var(--muted);font-size:15px}
-.check{padding:28px;margin-bottom:28px}
-.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:22px 0}
-label.f{display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:600;color:var(--muted)}
-select{appearance:none;-webkit-appearance:none;min-height:52px;padding:0 44px 0 16px;border-radius:16px;border:1px solid var(--line);color:var(--text);font:500 16px inherit;font-family:inherit;background:var(--glass2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237a8594' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M5 9l7 7 7-7'/%3E%3C/svg%3E") no-repeat right 16px center;width:100%}
-:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.bar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
-button.go{min-height:52px;padding:0 28px;border:0;border-radius:999px;background:var(--accent);color:var(--onaccent);font:600 16px inherit;font-family:inherit;cursor:pointer;box-shadow:0 6px 18px var(--shadow)}
-.head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:20px}
-.head h1{font-size:40px;line-height:1.1;letter-spacing:-1.4px;font-weight:600}
-.cols{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start;transition:opacity .2s}
-.cols.stale{opacity:.45}
-.l{flex:3 1 520px;display:flex;flex-direction:column;gap:20px;min-width:0}.r{flex:2 1 340px;display:flex;flex-direction:column;gap:20px;min-width:0}
-.card{padding:28px}
-.auth{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
-.eyebrow{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.big{font-size:34px;letter-spacing:-1px;font-weight:600;margin:6px 0 10px}
-.badge{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;font-size:14px;font-weight:600}
-.b-warn{background:var(--warnbg);color:var(--warn)}.b-ok{background:var(--okbg);color:var(--ok)}.b-n{background:var(--nbg);color:var(--text)}
-.rule{border:0;border-top:1px solid var(--line);margin:18px 0}
-.docs{display:flex;flex-direction:column;margin-top:14px}
-.doc{display:flex;align-items:center;gap:14px;min-height:56px;border-top:1px solid var(--line);cursor:pointer}
-.doc span{flex:1}.doc em{font-style:normal;font-size:14px;color:var(--muted)}.doc input:checked~em{color:var(--ok);font-weight:600}
-input[type=checkbox]{appearance:none;-webkit-appearance:none;width:26px;height:26px;margin:0;border-radius:9px;border:1.5px solid var(--bar0);background:var(--glass2);display:grid;place-items:center;flex:none;cursor:pointer}
-input[type=checkbox]:checked{background:var(--accent);border-color:var(--accent)}
-input[type=checkbox]:checked::after{content:"";width:6px;height:12px;border:solid var(--onaccent);border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
-.track{display:flex;height:10px;border-radius:5px;background:var(--track);overflow:hidden;margin:10px 0 8px}
-.track i{display:block;height:100%}.t0{background:var(--bar0)}.t1{background:var(--accent)}
-.row{display:flex;justify-content:space-between;gap:16px;font-weight:500}
-.hero{padding:28px;border-radius:28px;background:linear-gradient(145deg,color-mix(in srgb,var(--accent) 88%,#fff),color-mix(in srgb,var(--accent) 60%,#6b4fd8));color:#fff;margin:18px 0 22px}
-.hero .n{font-size:56px;font-weight:600;letter-spacing:-2px;line-height:1.1;margin:8px 0}
-.hero p{font-size:15px}
-.lines>div{display:flex;justify-content:space-between;padding:12px 0;color:var(--muted)}.lines b{color:var(--text);font-weight:600}
-.lines .tot{border-top:1px solid var(--line);margin-top:6px;padding-top:16px;color:var(--text);font-weight:600;font-size:18px}
-details{margin-top:12px;border-top:1px solid var(--line);padding-top:14px}summary{cursor:pointer;font-weight:600;min-height:32px}
-details ul{margin:10px 0 0;padding-left:20px;color:var(--muted);font-size:15px}
-ol{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-direction:column;gap:16px}ol li{display:flex;gap:14px}
-ol i{flex:none;width:34px;height:34px;border-radius:50%;background:var(--glass2);border:1px solid var(--line);display:grid;place-items:center;font-style:normal;font-weight:600;font-size:14px;color:var(--accent)}
-ol b{display:block;font-weight:600}ol span{color:var(--muted);font-size:15px}
-.note{margin:20px 6px 0;text-align:center;color:var(--muted);font-size:14px}
-[hidden]{display:none!important}
-.seg{display:flex;gap:4px;padding:4px;border-radius:999px;background:var(--track)}
-.seg button{min-height:44px;padding:0 20px;border:0;border-radius:999px;background:transparent;color:var(--muted);font:600 15px inherit;font-family:inherit;cursor:pointer}
-.seg button[aria-pressed=true]{background:var(--glass2);color:var(--text);box-shadow:0 1px 3px var(--shadow)}
-.phero{text-align:center;padding:36px 24px;margin-bottom:20px}
-.phero .n{font-size:56px;font-weight:600;letter-spacing:-2px;line-height:1.1;margin:8px 0}
-.pre{padding:20px;border-radius:22px;margin-top:16px;background:var(--warnbg)}.pre.ok{background:var(--okbg)}.pre.nn{background:var(--nbg)}
-.pre b{display:block;font-size:18px;margin-bottom:6px}
-.src{display:flex;gap:14px;align-items:center;margin:18px 0 12px}
-@media (max-width:640px){.phero .n{font-size:44px}}
-@media (max-width:640px){.panel{margin:12px;padding:14px;border-radius:28px}.head h1{font-size:30px}.hero .n{font-size:44px}}
-</style>
-</head>
-<body>
-<div class="panel">
-<header>
-<div class="nav glass" style="border-radius:999px">
-<svg width="32" height="32" viewBox="0 0 24 24" role="img" aria-label="Logo"><rect width="24" height="24" rx="7" fill="var(--accent)"/><path d="M10 5h4v5h5v4h-5v5h-4v-5H5v-4h5z" fill="var(--onaccent)"/></svg>
-<div class="seg" role="group" aria-label="View"><button id="vP" aria-pressed="true">Provider</button><button id="vT" aria-pressed="false">Patient</button></div>
-</div>
-</header>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Coverage check</title>
+    <style>
+      :root {
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        --bg1: #c5d1dd;
+        --bg2: #e3e9f0;
+        --glass: rgba(255, 255, 255, 0.58);
+        --glass2: rgba(255, 255, 255, 0.75);
+        --edge: rgba(255, 255, 255, 0.85);
+        --shadow: rgba(50, 70, 100, 0.1);
+        --text: #1b1f26;
+        --muted: #4a5563;
+        --line: rgba(60, 80, 110, 0.16);
+        --accent: #2f6bed;
+        --onaccent: #fff;
+        --bar0: rgba(70, 90, 120, 0.35);
+        --track: rgba(60, 80, 110, 0.13);
+        --ok: #1f7a45;
+        --warn: #8a5a00;
+        --warnbg: rgba(240, 170, 40, 0.2);
+        --okbg: rgba(50, 170, 100, 0.18);
+        --nbg: rgba(90, 110, 140, 0.16);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg1: #0e131a;
+          --bg2: #1a2331;
+          --glass: rgba(255, 255, 255, 0.07);
+          --glass2: rgba(255, 255, 255, 0.11);
+          --edge: rgba(255, 255, 255, 0.14);
+          --shadow: rgba(0, 0, 0, 0.35);
+          --text: #f1f4f8;
+          --muted: #a9b4c3;
+          --line: rgba(255, 255, 255, 0.14);
+          --accent: #6b9bff;
+          --onaccent: #0b1220;
+          --bar0: rgba(255, 255, 255, 0.3);
+          --track: rgba(255, 255, 255, 0.12);
+          --ok: #6fd49a;
+          --warn: #f2bb55;
+          --warnbg: rgba(240, 170, 40, 0.18);
+          --okbg: rgba(80, 200, 130, 0.16);
+          --nbg: rgba(255, 255, 255, 0.1);
+        }
+      }
+      :root[data-theme="dark"] {
+        --bg1: #0e131a;
+        --bg2: #1a2331;
+        --glass: rgba(255, 255, 255, 0.07);
+        --glass2: rgba(255, 255, 255, 0.11);
+        --edge: rgba(255, 255, 255, 0.14);
+        --shadow: rgba(0, 0, 0, 0.35);
+        --text: #f1f4f8;
+        --muted: #a9b4c3;
+        --line: rgba(255, 255, 255, 0.14);
+        --accent: #6b9bff;
+        --onaccent: #0b1220;
+        --bar0: rgba(255, 255, 255, 0.3);
+        --track: rgba(255, 255, 255, 0.12);
+        --ok: #6fd49a;
+        --warn: #f2bb55;
+        --warnbg: rgba(240, 170, 40, 0.18);
+        --okbg: rgba(80, 200, 130, 0.16);
+        --nbg: rgba(255, 255, 255, 0.1);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-padding-top: env(safe-area-inset-top, 0px);
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg2)
+          linear-gradient(160deg, var(--bg1), var(--bg2) 50%, var(--bg1)) fixed;
+        color: var(--text);
+        font:
+          16px/1.5 -apple-system,
+          BlinkMacSystemFont,
+          "SF Pro Text",
+          "Helvetica Neue",
+          Arial,
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+        font-variant-numeric: tabular-nums;
+      }
+      .panel {
+        max-width: 1180px;
+        margin: 24px auto;
+        padding: 24px;
+        border-radius: 40px;
+        background: var(--glass);
+        border: 1px solid var(--edge);
+        backdrop-filter: blur(28px);
+        -webkit-backdrop-filter: blur(28px);
+        box-shadow: 0 12px 40px var(--shadow);
+      }
+      .glass {
+        background: var(--glass);
+        border: 1px solid var(--edge);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 6px 24px var(--shadow);
+        border-radius: 28px;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 28px;
+      }
+      .nav {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 8px 6px 10px;
+        border-radius: 999px;
+      }
+      .nav b {
+        min-height: 44px;
+        padding: 0 20px;
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        background: var(--glass2);
+        font-size: 15px;
+        font-weight: 600;
+        box-shadow: 0 1px 3px var(--shadow);
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 999px;
+        font-size: 14px;
+        font-weight: 600;
+        background: var(--glass2);
+        border: 1px solid var(--edge);
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--ok);
+      }
+      .stale .dot {
+        background: var(--warn);
+      }
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+      h2 {
+        font-size: 22px;
+        letter-spacing: -0.4px;
+        font-weight: 600;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 15px;
+      }
+      .check {
+        padding: 28px;
+        margin-bottom: 28px;
+      }
+      .fields {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+        margin: 22px 0;
+      }
+      label.f {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--muted);
+      }
+      select {
+        appearance: none;
+        -webkit-appearance: none;
+        min-height: 52px;
+        padding: 0 44px 0 16px;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        color: var(--text);
+        font: 500 16px inherit;
+        font-family: inherit;
+        background: var(--glass2)
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237a8594' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M5 9l7 7 7-7'/%3E%3C/svg%3E")
+          no-repeat right 16px center;
+        width: 100%;
+      }
+      :focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: 2px;
+      }
+      .bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      button.go {
+        min-height: 52px;
+        padding: 0 28px;
+        border: 0;
+        border-radius: 999px;
+        background: var(--accent);
+        color: var(--onaccent);
+        font: 600 16px inherit;
+        font-family: inherit;
+        cursor: pointer;
+        box-shadow: 0 6px 18px var(--shadow);
+      }
+      .head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+      .head h1 {
+        font-size: 40px;
+        line-height: 1.1;
+        letter-spacing: -1.4px;
+        font-weight: 600;
+      }
+      .cols {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        transition: opacity 0.2s;
+      }
+      .cols.stale {
+        opacity: 0.45;
+      }
+      .l {
+        flex: 3 1 520px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        min-width: 0;
+      }
+      .r {
+        flex: 2 1 340px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        min-width: 0;
+      }
+      .card {
+        padding: 28px;
+      }
+      .auth {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: flex-start;
+      }
+      .eyebrow {
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .big {
+        font-size: 34px;
+        letter-spacing: -1px;
+        font-weight: 600;
+        margin: 6px 0 10px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .b-warn {
+        background: var(--warnbg);
+        color: var(--warn);
+      }
+      .b-ok {
+        background: var(--okbg);
+        color: var(--ok);
+      }
+      .b-n {
+        background: var(--nbg);
+        color: var(--text);
+      }
+      .rule {
+        border: 0;
+        border-top: 1px solid var(--line);
+        margin: 18px 0;
+      }
+      .docs {
+        display: flex;
+        flex-direction: column;
+        margin-top: 14px;
+      }
+      .doc {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-height: 56px;
+        border-top: 1px solid var(--line);
+        cursor: pointer;
+      }
+      .doc span {
+        flex: 1;
+      }
+      .doc em {
+        font-style: normal;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .doc input:checked ~ em {
+        color: var(--ok);
+        font-weight: 600;
+      }
+      input[type="checkbox"] {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 26px;
+        height: 26px;
+        margin: 0;
+        border-radius: 9px;
+        border: 1.5px solid var(--bar0);
+        background: var(--glass2);
+        display: grid;
+        place-items: center;
+        flex: none;
+        cursor: pointer;
+      }
+      input[type="checkbox"]:checked {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+      input[type="checkbox"]:checked::after {
+        content: "";
+        width: 6px;
+        height: 12px;
+        border: solid var(--onaccent);
+        border-width: 0 2.5px 2.5px 0;
+        transform: rotate(45deg) translate(-1px, -1px);
+      }
+      .track {
+        display: flex;
+        height: 10px;
+        border-radius: 5px;
+        background: var(--track);
+        overflow: hidden;
+        margin: 10px 0 8px;
+      }
+      .track i {
+        display: block;
+        height: 100%;
+      }
+      .t0 {
+        background: var(--bar0);
+      }
+      .t1 {
+        background: var(--accent);
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        font-weight: 500;
+      }
+      .hero {
+        padding: 28px;
+        border-radius: 28px;
+        background: linear-gradient(
+          145deg,
+          color-mix(in srgb, var(--accent) 88%, #fff),
+          color-mix(in srgb, var(--accent) 60%, #6b4fd8)
+        );
+        color: #fff;
+        margin: 18px 0 22px;
+      }
+      .hero .n {
+        font-size: 56px;
+        font-weight: 600;
+        letter-spacing: -2px;
+        line-height: 1.1;
+        margin: 8px 0;
+      }
+      .hero p {
+        font-size: 15px;
+      }
+      .lines > div {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        color: var(--muted);
+      }
+      .lines b {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .lines .tot {
+        border-top: 1px solid var(--line);
+        margin-top: 6px;
+        padding-top: 16px;
+        color: var(--text);
+        font-weight: 600;
+        font-size: 18px;
+      }
+      details {
+        margin-top: 12px;
+        border-top: 1px solid var(--line);
+        padding-top: 14px;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+        min-height: 32px;
+      }
+      details ul {
+        margin: 10px 0 0;
+        padding-left: 20px;
+        color: var(--muted);
+        font-size: 15px;
+      }
+      ol {
+        list-style: none;
+        margin: 16px 0 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      ol li {
+        display: flex;
+        gap: 14px;
+      }
+      ol i {
+        flex: none;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: var(--glass2);
+        border: 1px solid var(--line);
+        display: grid;
+        place-items: center;
+        font-style: normal;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--accent);
+      }
+      ol b {
+        display: block;
+        font-weight: 600;
+      }
+      ol span {
+        color: var(--muted);
+        font-size: 15px;
+      }
+      .note {
+        margin: 20px 6px 0;
+        text-align: center;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .seg {
+        display: flex;
+        gap: 4px;
+        padding: 4px;
+        border-radius: 999px;
+        background: var(--track);
+      }
+      .seg button {
+        min-height: 44px;
+        padding: 0 20px;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: var(--muted);
+        font: 600 15px inherit;
+        font-family: inherit;
+        cursor: pointer;
+      }
+      .seg button[aria-pressed="true"] {
+        background: var(--glass2);
+        color: var(--text);
+        box-shadow: 0 1px 3px var(--shadow);
+      }
+      .phero {
+        text-align: center;
+        padding: 36px 24px;
+        margin-bottom: 20px;
+      }
+      .phero .n {
+        font-size: 56px;
+        font-weight: 600;
+        letter-spacing: -2px;
+        line-height: 1.1;
+        margin: 8px 0;
+      }
+      .pre {
+        padding: 20px;
+        border-radius: 22px;
+        margin-top: 16px;
+        background: var(--warnbg);
+      }
+      .pre.ok {
+        background: var(--okbg);
+      }
+      .pre.nn {
+        background: var(--nbg);
+      }
+      .pre b {
+        display: block;
+        font-size: 18px;
+        margin-bottom: 6px;
+      }
+      .src {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        margin: 18px 0 12px;
+      }
+      @media (max-width: 640px) {
+        .phero .n {
+          font-size: 44px;
+        }
+      }
+      @media (max-width: 640px) {
+        .panel {
+          margin: 12px;
+          padding: 14px;
+          border-radius: 28px;
+        }
+        .head h1 {
+          font-size: 30px;
+        }
+        .hero .n {
+          font-size: 44px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="panel">
+      <header>
+        <div class="nav glass" style="border-radius: 999px">
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            role="img"
+            aria-label="Logo"
+          >
+            <rect width="24" height="24" rx="7" fill="var(--accent)" />
+            <path d="M10 5h4v5h5v4h-5v5h-4v-5H5v-4h5z" fill="var(--onaccent)" />
+          </svg>
+          <div class="seg" role="group" aria-label="View">
+            <button id="vP" aria-pressed="true">Provider</button
+            ><button id="vT" aria-pressed="false">Patient</button>
+          </div>
+        </div>
+      </header>
 
-<div id="provView">
-<section class="check glass" aria-labelledby="t1">
-<h2 id="t1">Start a coverage check</h2>
-<p class="sub">Choose a sample patient and the service being considered.</p>
-<div class="fields">
-<label class="f">Patient<select id="pat"></select></label>
-<label class="f">Procedure · CPT / HCPCS<select id="proc"></select></label>
-<label class="f">Diagnosis · ICD-10<select id="dx"></select></label>
-</div>
-<div class="bar"><p class="sub">Illustrative benefit rules and fully synthetic patient profiles.</p><button class="go" id="go">Evaluate coverage</button></div>
-</section>
+      <div id="provView">
+        <section class="check glass" aria-labelledby="t1">
+          <h2 id="t1">Start a coverage check</h2>
+          <p class="sub">
+            Choose a sample patient and the service being considered.
+          </p>
+          <div class="fields">
+            <label class="f">Patient<select id="pat"></select></label>
+            <label class="f"
+              >Procedure · CPT / HCPCS<select id="proc"></select
+            ></label>
+            <label class="f">Diagnosis · ICD-10<select id="dx"></select></label>
+          </div>
+          <div class="bar">
+            <p class="sub">
+              Illustrative benefit rules and fully synthetic patient profiles.
+            </p>
+            <button class="go" id="go">Evaluate coverage</button>
+          </div>
+        </section>
 
-<div class="head">
-<div><h1>Coverage snapshot</h1><p class="sub" id="ctx"></p></div>
-<span class="pill" id="state" role="status"><span class="dot"></span><span id="stateTxt">Connecting to API...</span></span>
-</div>
+        <div class="head">
+          <div>
+            <h1>Coverage snapshot</h1>
+            <p class="sub" id="ctx"></p>
+          </div>
+          <span class="pill" id="state" role="status"
+            ><span class="dot"></span
+            ><span id="stateTxt">Connecting to API...</span></span
+          >
+        </div>
 
-<div class="cols" id="out">
-<div class="l">
-<section class="card glass" id="auth"></section>
-<section class="card glass" id="docsCard"></section>
-<section class="card glass" id="ben"></section>
-</div>
-<div class="r">
-<section class="card glass" id="cost"></section>
-<section class="card glass">
-<h2>What happens next</h2>
-<ol>
-<li><i>1</i><div><b>Review the service</b><span>Confirm the procedure and the patient’s insurance details.</span></div></li>
-<li><i>2</i><div><b>Check the paperwork</b><span id="step2"></span></div></li>
-<li><i>3</i><div><b>Confirm with the insurer</b><span>Verify coverage before care is delivered.</span></div></li>
-</ol>
-</section>
-</div>
-</div>
-</div>
-<div id="patView" hidden></div>
-<p class="note">This is an estimate, not an official decision from the insurer. Illustrative prototype using synthetic information.</p>
-</div>
+        <div class="cols" id="out">
+          <div class="l">
+            <section class="card glass" id="auth"></section>
+            <section class="card glass" id="docsCard"></section>
+            <section class="card glass" id="ben"></section>
+          </div>
+          <div class="r">
+            <section class="card glass" id="cost"></section>
+            <section class="card glass">
+              <h2>What happens next</h2>
+              <ol>
+                <li>
+                  <i>1</i>
+                  <div>
+                    <b>Review the service</b
+                    ><span
+                      >Confirm the procedure and the patient’s insurance
+                      details.</span
+                    >
+                  </div>
+                </li>
+                <li>
+                  <i>2</i>
+                  <div><b>Check the paperwork</b><span id="step2"></span></div>
+                </li>
+                <li>
+                  <i>3</i>
+                  <div>
+                    <b>Confirm with the insurer</b
+                    ><span>Verify coverage before care is delivered.</span>
+                  </div>
+                </li>
+              </ol>
+            </section>
+          </div>
+        </div>
+      </div>
+      <div id="patView" hidden></div>
+      <p class="note">
+        This is an estimate, not an official decision from the insurer.
+        Illustrative prototype using synthetic information.
+      </p>
+    </div>
 
-<script>
-'use strict';
-// Uses port 8000 (standard for uvicorn main:app --reload)
-const API = 'http://127.0.0.1:8000/api/v1';
-const $ = id => document.getElementById(id);
-const money = value => Number(value ?? 0).toLocaleString('en-US', {style:'currency',currency:'USD'});
-const safe = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const persons = new Map();
-const procedures = new Map();
-let currentResult = null;
-let requestNumber = 0;
+    <script>
+      "use strict";
+      // Uses port 8000 (standard for uvicorn main:app --reload)
+      const API = "http://127.0.0.1:8000/api/v1";
+      const $ = (id) => document.getElementById(id);
+      const money = (value) =>
+        Number(value ?? 0).toLocaleString("en-US", {
+          style: "currency",
+          currency: "USD",
+        });
+      const safe = (value) =>
+        String(value ?? "").replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      const persons = new Map();
+      const procedures = new Map();
+      let currentResult = null;
+      let requestNumber = 0;
 
-function message(text, stale = false) {
-  $('stateTxt').textContent = text;
-  $('state').classList.toggle('stale', stale);
-  $('out').classList.toggle('stale', stale);
-}
+      function message(text, stale = false) {
+        $("stateTxt").textContent = text;
+        $("state").classList.toggle("stale", stale);
+        $("out").classList.toggle("stale", stale);
+      }
 
-async function apiRequest(path, options = {}) {
-  const response = await fetch(API + path, options);
-  if (!response.ok) {
-    let detail = '';
-    try { detail = JSON.stringify((await response.json()).detail ?? ''); } catch (_) {}
-    throw new Error(`HTTP ${response.status}${detail ? ': ' + detail : ''}`);
-  }
-  return response.json();
-}
+      async function apiRequest(path, options = {}) {
+        const response = await fetch(API + path, options);
+        if (!response.ok) {
+          let detail = "";
+          try {
+            detail = JSON.stringify((await response.json()).detail ?? "");
+          } catch (_) {}
+          throw new Error(
+            `HTTP ${response.status}${detail ? ": " + detail : ""}`,
+          );
+        }
+        return response.json();
+      }
 
-function setOptions(select, rows, id, label) {
-  select.replaceChildren();
-  rows.forEach(row => {
-    const opt = document.createElement('option');
-    opt.value = id(row);
-    opt.textContent = label(row);
-    select.append(opt);
-  });
-}
+      function setOptions(select, rows, id, label) {
+        select.replaceChildren();
+        rows.forEach((row) => {
+          const opt = document.createElement("option");
+          opt.value = id(row);
+          opt.textContent = label(row);
+          select.append(opt);
+        });
+      }
 
-function listStatus(status) {
-  if (status === 'LIKELY_REQUIRED') {
-    return ['b-warn', 'Likely required', 'Clinical documentation required for payer medical necessity review.'];
-  }
-  if (status === 'NOT_INDICATED') {
-    return ['b-ok', 'Not indicated', 'Standard in-network coverage; no prior authorization required under active plan terms.'];
-  }
-  // Clinical wording for unmapped/general services:
-  return ['b-n', 'Standard review', 'No specialized prior-auth policy on file. Coverage adheres to general plan medical benefits.'];
-}
+      function listStatus(status) {
+        if (status === "LIKELY_REQUIRED") {
+          return [
+            "b-warn",
+            "Likely required",
+            "Prior authorization may be required under the modeled payer policy.",
+          ];
+        }
 
-function render(result) {
-  currentResult = result;
-  const f = result.financial_breakdown;
-  const patient = persons.get(result.patient_id);
-  const planName = result.plan_name || patient?.plan_id || 'Sample Insurance Plan';
-  const [badgeClass, title, info] = listStatus(result.pa_status);
-  const procedure = safe(result.procedure_name);
-  const name = safe(result.patient_name);
-  const plan = safe(planName);
-  const docs = Array.isArray(result.required_documents) ? result.required_documents : [];
-  
-  $('ctx').textContent = `${result.patient_name} · ${result.procedure_name} · ${planName}`;
-// Clean status tag
-const displayStatus = result.pa_status === 'INSUFFICIENT_INFORMATION' 
-  ? 'Standard Clinical Verification' 
-  : result.pa_status === 'LIKELY_REQUIRED' 
-  ? 'Prior Authorization Required' 
-  : 'Prior Authorization Not Required';
+        if (status === "NOT_INDICATED") {
+          return [
+            "b-ok",
+            "Not indicated",
+            "Prior authorization is not indicated under the available modeled coverage rules.",
+          ];
+        }
 
-// Avoid repeating sentences if the backend rationale already says "No explicit payer policy..."
-const descriptionText = result.denial_rationale && !result.denial_rationale.includes(info)
-  ? `${safe(info)} ${safe(result.denial_rationale)}`
-  : safe(result.denial_rationale || info);
+        return [
+          "b-n",
+          "Insufficient information",
+          "Available payer policy information is insufficient to determine authorization requirements. Verify requirements with the insurer.",
+        ];
+      }
 
-$('auth').innerHTML = `
+      function render(result) {
+        currentResult = result;
+        const f = result.financial_breakdown;
+        const acc = result.accumulators;
+        const oopAdjustment = Number(f.oop_adjustment ?? 0);
+        const actualDeductibleAdded = Math.max(
+          0,
+          Number(acc.deductible_met_after) - Number(acc.deductible_met_before),
+        );
+        const actualOopAdded = Math.max(
+          0,
+          Number(acc.oop_met_after) - Number(acc.oop_met_before),
+        );
+        const patient = persons.get(result.patient_id);
+        const planName =
+          result.plan_name || patient?.plan_id || "Sample Insurance Plan";
+        const [badgeClass, title, info] = listStatus(result.pa_status);
+        const procedure = safe(result.procedure_name);
+        const name = safe(result.patient_name);
+        const plan = safe(planName);
+        const docs = Array.isArray(result.required_documents)
+          ? result.required_documents
+          : [];
+
+        $("ctx").textContent =
+          `${result.patient_name} · ${result.procedure_name} · ${planName}`;
+        // Clean status tag
+        const displayStatus =
+          result.pa_status === "LIKELY_REQUIRED"
+            ? "Prior Authorization Likely Required"
+            : result.pa_status === "NOT_INDICATED"
+              ? "Prior Authorization Not Indicated"
+              : "Insufficient Policy Information";
+
+        // Avoid repeating sentences if the backend rationale already says "No explicit payer policy..."
+        const descriptionText =
+          result.denial_rationale && !result.denial_rationale.includes(info)
+            ? `${safe(info)} ${safe(result.denial_rationale)}`
+            : safe(result.denial_rationale || info);
+
+        $("auth").innerHTML = `
   <div class="auth">
     <div>
       <p class="eyebrow">Prior authorization</p>
@@ -208,38 +798,134 @@ $('auth').innerHTML = `
   <hr class="rule">
   <p class="sub">Payer policy status · <b>${displayStatus}</b></p>
 `;
-  
-  $('docsCard').style.display = docs.length ? '' : 'none';
-  if (docs.length) {
-    $('docsCard').innerHTML = `<div class="bar"><div><h2>Documentation checklist</h2><p class="sub">Sample documents to gather for review.</p></div><span class="pill" id="cnt"></span></div><div class="track"><i class="t1" id="prog"></i></div><div class="docs">${docs.map(d => `<label class="doc"><input type="checkbox"><span>${safe(typeof d === 'string' ? d : d.label ?? d.code ?? 'Required document')}</span><em>To gather</em></label>`).join('')}</div><p class="sub" style="margin-top:14px">Checking a box only tracks this demo checklist; it does not submit authorization.</p>`;
-    const update = () => {
-      const boxes = Array.from($('docsCard').querySelectorAll('input'));
-      const count = boxes.filter(x => x.checked).length;
-      $('cnt').textContent = `${count} of ${boxes.length} available`;
-      $('prog').style.width = `${boxes.length ? (100 * count / boxes.length) : 0}%`;
-      boxes.forEach(b => b.parentElement.querySelector('em').textContent = b.checked ? 'Available' : 'To gather');
-      $('step2').textContent = count === boxes.length ? 'All listed demo documents are marked available.' : `${boxes.length-count} listed document(s) still to gather.`;
-    };
-    $('docsCard').querySelectorAll('input').forEach(input => input.addEventListener('change', update));
-    update();
-  } else {
-    $('step2').textContent = result.pa_status === 'INSUFFICIENT_INFORMATION' ? 'Confirm the required records with the insurer.' : 'No documentation checklist is configured for this evaluation.';
-  }
 
-  $('cost').innerHTML = `<h2>Cost estimate</h2><p class="sub">Calculated by the Python coverage engine.</p><div class="hero"><p>Estimated patient responsibility</p><div class="n">${money(f.total_patient_responsibility)}</div><p>Before final claim processing · synthetic data</p></div><div class="lines"><div>Insurance allowed amount<b>${money(f.total_allowed_amount)}</b></div><div>Deductible applied<b>${money(f.deductible_applied)}</b></div><div>Copay<b>${money(f.copay_applied)}</b></div><div>Coinsurance<b>${money(f.coinsurance_applied)}</b></div><div class="tot">Plan responsibility<b>${money(f.estimated_plan_responsibility)}</b></div></div><details><summary>See calculation assumptions</summary><ul><li>Base allowable: ${money(f.base_allowable)}.</li><li>Contract multiplier: ${Number(f.contract_multiplier).toFixed(2)}×.</li><li>Out-of-pocket maximum reached during estimate: ${f.oop_max_reached ? 'Yes' : 'No'}.</li></ul></details>`;
+        $("docsCard").style.display = docs.length ? "" : "none";
+        if (docs.length) {
+          $("docsCard").innerHTML =
+            `<div class="bar"><div><h2>Documentation checklist</h2><p class="sub">Sample documents to gather for review.</p></div><span class="pill" id="cnt"></span></div><div class="track"><i class="t1" id="prog"></i></div><div class="docs">${docs.map((d) => `<label class="doc"><input type="checkbox"><span>${safe(typeof d === "string" ? d : (d.label ?? d.code ?? "Required document"))}</span><em>To gather</em></label>`).join("")}</div><p class="sub" style="margin-top:14px">Checking a box only tracks this demo checklist; it does not submit authorization.</p>`;
+          const update = () => {
+            const boxes = Array.from($("docsCard").querySelectorAll("input"));
+            const count = boxes.filter((x) => x.checked).length;
+            $("cnt").textContent = `${count} of ${boxes.length} available`;
+            $("prog").style.width =
+              `${boxes.length ? (100 * count) / boxes.length : 0}%`;
+            boxes.forEach(
+              (b) =>
+                (b.parentElement.querySelector("em").textContent = b.checked
+                  ? "Available"
+                  : "To gather"),
+            );
+            $("step2").textContent =
+              count === boxes.length
+                ? "All listed demo documents are marked available."
+                : `${boxes.length - count} listed document(s) still to gather.`;
+          };
+          $("docsCard")
+            .querySelectorAll("input")
+            .forEach((input) => input.addEventListener("change", update));
+          update();
+        } else {
+          $("step2").textContent =
+            result.pa_status === "INSUFFICIENT_INFORMATION"
+              ? "Confirm the required records with the insurer."
+              : "No documentation checklist is configured for this evaluation.";
+        }
 
-  const acc = result.accumulators;
-  const pct = (a, b) => (b > 0 ? Math.min(100, Math.max(0, (a / b) * 100)) : 0);
+        $("cost").innerHTML = `
+  <h2>Cost estimate</h2>
+  <p class="sub">Calculated by the Python coverage engine.</p>
 
-  // Compute bar widths for visual tracking
-  const dedMetPct = pct(acc.deductible_met_before, acc.individual_deductible);
-  const dedAddedPct = pct(f.deductible_applied, acc.individual_deductible);
+  <div class="hero">
+    <p>Estimated patient responsibility</p>
+    <div class="n">${money(f.total_patient_responsibility)}</div>
+    <p>Before final claim processing · synthetic data</p>
+  </div>
 
-  const oopMetPct = pct(acc.oop_met_before, acc.annual_oop_max);
-  const oopAddedPct = pct(f.total_patient_responsibility, acc.annual_oop_max);
+  <div class="lines">
+    <div>
+      Insurance allowed amount
+      <b>${money(f.total_allowed_amount)}</b>
+    </div>
 
-  // 1. Render Benefits at a Glance (with interactive progress meters!)
-  $('ben').innerHTML = `
+    <div>
+      ${oopAdjustment > 0 ? "Deductible before OOP limit" : "Deductible applied"}
+      <b>${money(f.deductible_applied)}</b>
+    </div>
+
+    <div>
+      Copay
+      <b>${money(f.copay_applied)}</b>
+    </div>
+
+    <div>
+      Coinsurance
+      <b>${money(f.coinsurance_applied)}</b>
+    </div>
+
+    ${
+      oopAdjustment > 0
+        ? `
+      <div>
+        Out-of-pocket limit adjustment
+        <b style="color:var(--ok)">
+          −${money(oopAdjustment)}
+        </b>
+      </div>
+    `
+        : ""
+    }
+
+    <div class="tot">
+      Patient responsibility
+      <b>${money(f.total_patient_responsibility)}</b>
+    </div>
+
+    <div>
+      Plan responsibility
+      <b>${money(f.estimated_plan_responsibility)}</b>
+    </div>
+  </div>
+
+  <details>
+    <summary>See calculation assumptions</summary>
+    <ul>
+      <li>Base allowable: ${money(f.base_allowable)}.</li>
+      <li>Contract multiplier: ${Number(f.contract_multiplier).toFixed(2)}×.</li>
+      <li>Out-of-pocket maximum met after estimate: ${f.oop_max_reached ? "Yes" : "No"}.</li>
+
+      ${
+        oopAdjustment > 0
+          ? `
+        <li>
+          Calculated patient cost was reduced by
+          ${money(oopAdjustment)} because of the
+          annual out-of-pocket maximum.
+        </li>
+      `
+          : ""
+      }
+    </ul>
+  </details>
+`;
+
+        const pct = (a, b) =>
+          b > 0 ? Math.min(100, Math.max(0, (a / b) * 100)) : 0;
+
+        // Compute bar widths for visual tracking
+        const dedMetPct = pct(
+          acc.deductible_met_before,
+          acc.individual_deductible,
+        );
+        const dedAddedPct = pct(
+          actualDeductibleAdded,
+          acc.individual_deductible,
+        );
+
+        const oopMetPct = pct(acc.oop_met_before, acc.annual_oop_max);
+        const oopAddedPct = pct(actualOopAdded, acc.annual_oop_max);
+
+        // 1. Render Benefits at a Glance (with interactive progress meters!)
+        $("ben").innerHTML = `
     <h2>Benefits at a glance</h2>
     <p class="sub">How this service affects annual deductible and out-of-pocket maximums.</p>
 
@@ -253,7 +939,7 @@ $('auth').innerHTML = `
         <i class="t0" style="width:${dedMetPct}%"></i>
         <i class="t1" style="width:${dedAddedPct}%"></i>
       </div>
-      <p class="sub">${money(acc.deductible_met_before)} already met. This visit adds ${money(f.deductible_applied)}.</p>
+      <p class="sub">${money(acc.deductible_met_before)} already met. This visit adds ${money(actualDeductibleAdded)}.</p>
     </div>
 
     <!-- Out-of-Pocket Maximum Progress Bar -->
@@ -266,92 +952,265 @@ $('auth').innerHTML = `
         <i class="t0" style="width:${oopMetPct}%"></i>
         <i class="t1" style="width:${oopAddedPct}%"></i>
       </div>
-      <p class="sub">Includes previous ${money(acc.oop_met_before)} paid plus this service's ${money(f.total_patient_responsibility)}.</p>
+      <p class="sub">Includes previous ${money(acc.oop_met_before)} paid plus this service's ${money(actualOopAdded)}.</p>
+    
     </div>
   `;
-  const patientInfo = result.pa_status === 'LIKELY_REQUIRED' ? 'Your care team may need to request prior authorization before this service.' : result.pa_status === 'NOT_INDICATED' ? 'This sample evaluation does not indicate pre-approval for this service.' : 'Your care team needs to verify the authorization requirements.';
-  const bannerClass = result.pa_status === 'LIKELY_REQUIRED' ? '' : result.pa_status === 'NOT_INDICATED' ? 'ok' : 'nn';
-  
-  $('patView').innerHTML = `<section class="glass phero"><p class="sub" style="font-size:18px">${name} · ${procedure}</p><div class="n">${money(f.total_patient_responsibility)}</div><p class="sub" style="font-size:18px">Your estimated cost</p></section><div class="cols"><div class="l"><section class="card glass"><h2>Where your estimate comes from</h2><p class="sub">Calculated from your synthetic plan and procedure.</p><div class="src"><div><b>${procedure}</b><p class="sub">${plan} · Procedure ${safe(result.procedure_code)}</p></div></div><div class="lines"><div>Insurance allowed amount<b>${money(f.total_allowed_amount)}</b></div><div>Applied to deductible<b>${money(f.deductible_applied)}</b></div><div>Copay + coinsurance<b>${money(Number(f.copay_applied)+Number(f.coinsurance_applied))}</b></div><div class="tot">Estimated patient cost<b>${money(f.total_patient_responsibility)}</b></div></div></section><section class="card glass">${$('ben').innerHTML}</section></div><div class="r"><section class="card glass"><h2>Will I need pre-approval?</h2><div class="pre ${bannerClass}"><b>${title}</b><p class="sub" style="color:var(--text)">${safe(patientInfo)}</p></div></section><section class="card glass"><h2>What happens next?</h2><ol><li><i>1</i><div><b>Review the service</b><span>Confirm the procedure and plan.</span></div></li><li><i>2</i><div><b>Check documentation</b><span>${docs.length ? 'Your care team may need to gather supporting records.' : 'Ask your care team if documentation is needed.'}</span></div></li><li><i>3</i><div><b>Confirm with insurer</b><span>This estimate is not a guarantee of coverage.</span></div></li></ol></section></div></div>`;
-  message('Evaluation ready');
-}
+        const patientInfo =
+          result.pa_status === "LIKELY_REQUIRED"
+            ? "Your care team may need to request prior authorization before this service."
+            : result.pa_status === "NOT_INDICATED"
+              ? "This sample evaluation does not indicate pre-approval for this service."
+              : "Your care team needs to verify the authorization requirements.";
+        const bannerClass =
+          result.pa_status === "LIKELY_REQUIRED"
+            ? ""
+            : result.pa_status === "NOT_INDICATED"
+              ? "ok"
+              : "nn";
 
+        $("patView").innerHTML = `
+  <section class="glass phero">
+    <p class="sub" style="font-size:18px">
+      ${name} · ${procedure}
+    </p>
 
-async function evaluate() {
-  const patientId = $('pat').value;
-  const cptCode = $('proc').value;
-  const icd10 = $('dx').value;
-  if (!patientId || !cptCode) return;
-  const thisRequest = ++requestNumber;
-  $('go').disabled = true;
-  message('Evaluating coverage…', true);
-  try {
-    const result = await apiRequest('/evaluate-coverage', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        patient_id: patientId,
-        cpt_code: cptCode,
-        icd10_code: icd10
-      })
-    });
-    if (thisRequest === requestNumber) render(result);
-  } catch (err) {
-    if (thisRequest === requestNumber) {
-      message('Evaluation failed', true);
-      $('ctx').textContent = `Could not evaluate coverage: ${err.message}`;
-      console.error('Coverage evaluation error', err);
-    }
-  } finally { 
-    if (thisRequest === requestNumber) $('go').disabled = false; 
-  }
-}
+    <div class="n">${money(f.total_patient_responsibility)}</div>
 
-async function initialize() {
-  $('go').disabled = true;
-  message('Loading patients, procedures, and diagnoses…', true);
-  try {
-    const [patients, proceduresList, diagnosesList] = await Promise.all([
-      apiRequest('/patients'), 
-      apiRequest('/procedures'),
-      apiRequest('/diagnoses')
-    ]);
-    if (!patients.length || !proceduresList.length) throw new Error('No demo data returned');
-    
-    patients.forEach(p => persons.set(p.patient_id, p));
-    proceduresList.forEach(p => procedures.set(p.cpt_code, p));
+    <p class="sub" style="font-size:18px">
+      Your estimated cost
+    </p>
+  </section>
 
-    setOptions($('pat'), patients, p => p.patient_id, p => `${p.patient_id} · ${p.first_name} ${p.last_name}`);
-    setOptions($('proc'), proceduresList, p => p.cpt_code, p => `${p.cpt_code} · ${p.description}`);
-    setOptions($('dx'), diagnosesList, d => d.icd10_code, d => `${d.icd10_code} · ${d.description}`);
+  <div class="cols">
+    <div class="l">
 
-    if (persons.has('PAT-001')) $('pat').value = 'PAT-001';
-    if (procedures.has('73721')) $('proc').value = '73721';
-    await evaluate();
-  } catch (err) {
-    message('Cannot connect to backend', true);
-    $('ctx').textContent = `Check that FastAPI is running on port 8000: ${err.message}`;
-    console.error('Startup error', err);
-  }
-}
+      <section class="card glass">
+        <h2>Where your estimate comes from</h2>
 
-['pat','proc','dx'].forEach(id => $(id).addEventListener('change', () => {
-  ++requestNumber;
-  $('go').disabled = false;
-  message('Selections changed · evaluate to update', true);
-}));
+        <p class="sub">
+          Calculated from your synthetic plan and procedure.
+        </p>
 
-function view(patient) {
-  $('provView').hidden = patient;
-  $('patView').hidden = !patient;
-  $('vP').setAttribute('aria-pressed', String(!patient));
-  $('vT').setAttribute('aria-pressed', String(patient));
-}
+        <div class="src">
+          <div>
+            <b>${procedure}</b>
+            <p class="sub">
+              ${plan} · Procedure ${safe(result.procedure_code)}
+            </p>
+          </div>
+        </div>
 
-$('vP').onclick = () => view(false);
-$('vT').onclick = () => view(true);
-$('go').onclick = evaluate;
-initialize();
-</script>
-</body>
+        <div class="lines">
+          <div>
+            Insurance allowed amount
+            <b>${money(f.total_allowed_amount)}</b>
+          </div>
+
+          <div>
+            ${oopAdjustment > 0 ? "Deductible before spending limit" : "Applied to deductible"}
+            <b>${money(f.deductible_applied)}</b>
+          </div>
+
+          <div>
+            Copay + coinsurance
+            <b>${money(
+              Number(f.copay_applied) + Number(f.coinsurance_applied),
+            )}</b>
+          </div>
+
+          ${
+            oopAdjustment > 0
+              ? `
+            <div>
+              Reduction from spending limit
+              <b style="color:var(--ok)">
+                −${money(oopAdjustment)}
+              </b>
+            </div>
+          `
+              : ""
+          }
+
+          <div class="tot">
+            Estimated patient cost
+            <b>${money(f.total_patient_responsibility)}</b>
+          </div>
+        </div>
+
+        ${
+          oopAdjustment > 0
+            ? `
+          <div class="pre ok">
+            <b>Your spending limit reduces your cost</b>
+            <p class="sub" style="color:var(--text)">
+              Under this sample insurance plan, your
+              annual out-of-pocket maximum reduces your
+              estimated cost by ${money(oopAdjustment)}.
+            </p>
+          </div>
+        `
+            : ""
+        }
+
+      </section>
+
+      <section class="card glass">
+        ${$("ben").innerHTML}
+      </section>
+
+    </div>
+
+    <div class="r">
+
+      <section class="card glass">
+        <h2>Will I need pre-approval?</h2>
+
+        <div class="pre ${bannerClass}">
+          <b>${title}</b>
+          <p class="sub" style="color:var(--text)">
+            ${safe(patientInfo)}
+          </p>
+        </div>
+      </section>
+
+      <section class="card glass">
+        <h2>What happens next?</h2>
+
+        <ol>
+          <li>
+            <i>1</i>
+            <div>
+              <b>Review the service</b>
+              <span>Confirm the procedure and plan.</span>
+            </div>
+          </li>
+
+          <li>
+            <i>2</i>
+            <div>
+              <b>Check documentation</b>
+              <span>
+                ${
+                  docs.length
+                    ? "Your care team may need to gather supporting records."
+                    : "Ask your care team if documentation is needed."
+                }
+              </span>
+            </div>
+          </li>
+
+          <li>
+            <i>3</i>
+            <div>
+              <b>Confirm with insurer</b>
+              <span>This estimate is not a guarantee of coverage.</span>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+    </div>
+  </div>
+`;
+      }
+
+      async function evaluate() {
+        const patientId = $("pat").value;
+        const cptCode = $("proc").value;
+        const icd10 = $("dx").value;
+        if (!patientId || !cptCode) return;
+        const thisRequest = ++requestNumber;
+        $("go").disabled = true;
+        message("Evaluating coverage…", true);
+        try {
+          const result = await apiRequest("/evaluate-coverage", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              patient_id: patientId,
+              cpt_code: cptCode,
+              icd10_code: icd10,
+            }),
+          });
+          if (thisRequest === requestNumber) render(result);
+        } catch (err) {
+          if (thisRequest === requestNumber) {
+            message("Evaluation failed", true);
+            $("ctx").textContent =
+              `Could not evaluate coverage: ${err.message}`;
+            console.error("Coverage evaluation error", err);
+          }
+        } finally {
+          if (thisRequest === requestNumber) $("go").disabled = false;
+        }
+        message("Evaluation ready");
+      }
+
+      async function initialize() {
+        $("go").disabled = true;
+        message("Loading patients, procedures, and diagnoses…", true);
+        try {
+          const [patients, proceduresList, diagnosesList] = await Promise.all([
+            apiRequest("/patients"),
+            apiRequest("/procedures"),
+            apiRequest("/diagnoses"),
+          ]);
+          if (!patients.length || !proceduresList.length)
+            throw new Error("No demo data returned");
+
+          patients.forEach((p) => persons.set(p.patient_id, p));
+          proceduresList.forEach((p) => procedures.set(p.cpt_code, p));
+
+          setOptions(
+            $("pat"),
+            patients,
+            (p) => p.patient_id,
+            (p) => `${p.patient_id} · ${p.first_name} ${p.last_name}`,
+          );
+          setOptions(
+            $("proc"),
+            proceduresList,
+            (p) => p.cpt_code,
+            (p) => `${p.cpt_code} · ${p.description}`,
+          );
+          setOptions(
+            $("dx"),
+            diagnosesList,
+            (d) => d.icd10_code,
+            (d) => `${d.icd10_code} · ${d.description}`,
+          );
+
+          if (persons.has("PAT-001")) $("pat").value = "PAT-001";
+          if (procedures.has("73721")) $("proc").value = "73721";
+          await evaluate();
+        } catch (err) {
+          message("Cannot connect to backend", true);
+          $("ctx").textContent =
+            `Check that FastAPI is running on port 8000: ${err.message}`;
+          console.error("Startup error", err);
+        }
+      }
+
+      ["pat", "proc", "dx"].forEach((id) =>
+        $(id).addEventListener("change", () => {
+          ++requestNumber;
+          $("go").disabled = false;
+          message("Selections changed · evaluate to update", true);
+        }),
+      );
+
+      function view(patient) {
+        $("provView").hidden = patient;
+        $("patView").hidden = !patient;
+        $("vP").setAttribute("aria-pressed", String(!patient));
+        $("vT").setAttribute("aria-pressed", String(patient));
+      }
+
+      $("vP").onclick = () => view(false);
+      $("vT").onclick = () => view(true);
+      $("go").onclick = evaluate;
+      initialize();
+    </script>
+  </body>
 </html>

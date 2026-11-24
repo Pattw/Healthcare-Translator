@@ -82,6 +82,14 @@ def test_tc_calc_03_out_of_pocket_max_clamp():
     assert res.oop_max_reached is True
     assert res.new_oop_met_ytd == Decimal("7500.00")
 
+    assert res.oop_adjustment == Decimal("30.00")
+    assert (
+        res.deductible_applied
+        + res.copay_applied
+        + res.coinsurance_applied
+        - res.oop_adjustment
+    ) == res.total_patient_responsibility
+
 
 def test_preventive_aca_zero_cost():
     """
@@ -128,3 +136,64 @@ def test_flat_copay_service():
     # SO Copay does not advance deductible
     assert res.new_deductible_met_ytd == Decimal("0.00")
     assert res.new_oop_met_ytd == Decimal("245.00")
+
+
+def test_oop_exact_limit_reached():
+    """Verify that reaching the OOP maximum exactly sets the flag."""
+    claim = AdjudicationInput(
+        allowed_amount=Decimal("500.00"),
+        coinsurance_rate=Decimal("0.20"),
+        annual_deductible=Decimal("500.00"),
+        deductible_met_ytd=Decimal("500.00"),
+        annual_oop_max=Decimal("7500.00"),
+        oop_met_ytd=Decimal("7400.00"),
+    )
+
+    res = adjudicate_claim(claim)
+
+    assert res.total_patient_responsibility == Decimal("100.00")
+    assert res.oop_adjustment == Decimal("0.00")
+    assert res.new_oop_met_ytd == Decimal("7500.00")
+    assert res.oop_max_reached is True
+
+
+def test_oop_already_reached():
+    """Verify zero patient liability when the OOP maximum is met."""
+    claim = AdjudicationInput(
+        allowed_amount=Decimal("600.00"),
+        coinsurance_rate=Decimal("0.30"),
+        annual_deductible=Decimal("500.00"),
+        deductible_met_ytd=Decimal("500.00"),
+        annual_oop_max=Decimal("7500.00"),
+        oop_met_ytd=Decimal("7500.00"),
+    )
+
+    res = adjudicate_claim(claim)
+
+    assert res.total_patient_responsibility == Decimal("0.00")
+    assert res.estimated_plan_responsibility == Decimal("600.00")
+    assert res.oop_adjustment == Decimal("180.00")
+    assert res.oop_max_reached is True
+
+
+def test_oop_clamp_deductible_accumulator():
+    """Verify that deductible advancement cannot exceed patient payment."""
+    claim = AdjudicationInput(
+        allowed_amount=Decimal("600.00"),
+        coinsurance_rate=Decimal("0.20"),
+        annual_deductible=Decimal("1500.00"),
+        deductible_met_ytd=Decimal("1000.00"),
+        annual_oop_max=Decimal("6000.00"),
+        oop_met_ytd=Decimal("5900.00"),
+    )
+
+    res = adjudicate_claim(claim)
+
+    assert res.deductible_applied == Decimal("500.00")
+    assert res.coinsurance_applied == Decimal("20.00")
+    assert res.total_patient_responsibility == Decimal("100.00")
+    assert res.oop_adjustment == Decimal("420.00")
+    assert res.new_deductible_met_ytd == Decimal("1100.00")
+    assert res.new_oop_met_ytd == Decimal("6000.00")
+    assert res.estimated_plan_responsibility == Decimal("500.00")
+    assert res.oop_max_reached is True
