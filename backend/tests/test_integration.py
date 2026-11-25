@@ -44,6 +44,20 @@ def test_integration_tc_calc_03_devon_washington_oop_clamp():
     assert response.status_code == 200
     data = response.json()
 
+    financial = data["financial_breakdown"]
+    assert financial["oop_adjustment"] == 20.00
+
+    assert (
+        round(
+            financial["deductible_applied"]
+            + financial["copay_applied"]
+            + financial["coinsurance_applied"]
+            - financial["oop_adjustment"],
+            2,
+        )
+        == financial["total_patient_responsibility"]
+    )
+
     # Base: 600.00 * 1.00 = 600.00.
     # Tentative 20% coinsurance = 120.00.
     # Remaining OOP Max capacity = 7500.00 - 7400.00 = 100.00.
@@ -55,7 +69,7 @@ def test_integration_tc_calc_03_devon_washington_oop_clamp():
 
 def test_integration_tc_pa_01_checklist_extraction():
     """Verify dynamic JSONB checklist extraction from Supabase."""
-    payload = {"patient_id": "PT-1001", "cpt_code": "73721"}
+    payload = {"patient_id": "PT-1001", "cpt_code": "73721", "icd10_code": "M25.561"}
     response = client.post("/api/v1/evaluate-coverage", json=payload)
     assert response.status_code == 200
     data = response.json()
@@ -87,3 +101,31 @@ def test_integration_tc_err_02_invalid_patient():
     payload = {"patient_id": "PT-9999", "cpt_code": "73721"}
     response = client.post("/api/v1/evaluate-coverage", json=payload)
     assert response.status_code == 404
+
+
+def test_integration_diagnosis_mismatch():
+    """Verify that an unmatched diagnosis triggers safe fallback."""
+    payload = {"patient_id": "PT-1001", "cpt_code": "73721", "icd10_code": "R51.9"}
+
+    response = client.post("/api/v1/evaluate-coverage", json=payload)
+
+    assert response.status_code == 200
+    data = response.json()
+
+    assert data["pa_status"] == "INSUFFICIENT_INFORMATION"
+    assert len(data["required_documents"]) == 0
+    assert data["financial_breakdown"]["total_patient_responsibility"] == 552.00
+
+
+def test_integration_missing_diagnosis():
+    """Verify safe fallback when a required diagnosis is omitted."""
+    payload = {"patient_id": "PT-1001", "cpt_code": "73721"}
+
+    response = client.post("/api/v1/evaluate-coverage", json=payload)
+
+    assert response.status_code == 200
+    data = response.json()
+
+    assert data["pa_status"] == "INSUFFICIENT_INFORMATION"
+    assert len(data["required_documents"]) == 0
+    assert data["financial_breakdown"]["total_patient_responsibility"] == 552.00

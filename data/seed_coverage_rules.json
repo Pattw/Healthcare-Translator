@@ -1,0 +1,60 @@
+[
+  {
+    "rule_id": 1,
+    "cpt_code": "73721",
+    "plan_id": "BCBS_PPO_01",
+    "pa_required": true,
+    "min_conservative_weeks": 6,
+    "red_flag_bypass_allowed": true,
+    "required_documents": [
+      "Weight-bearing X-ray (within 60 days)",
+      "Clinical notes documenting 6 weeks failed conservative therapy",
+      "Physical therapy completion logs"
+    ],
+    "denial_rationale": "Knee MRI requests require documentation of failed conservative management prior to advanced diagnostic imaging.",
+    "appeal_guidelines": "Submit clinical records indicating acute trauma, joint effusion, or mechanical locking to qualify for red-flag bypass.",
+    "supported_diagnoses": ["M25.561", "M25.562"]
+  },
+  {
+    "rule_id": 2,
+    "cpt_code": "70553",
+    "plan_id": "BCBS_PPO_01",
+    "pa_required": true,
+    "min_conservative_weeks": 0,
+    "red_flag_bypass_allowed": true,
+    "required_documents": [
+      "Comprehensive neurological examination",
+      "Initial CT Head findings (if applicable)"
+    ],
+    "denial_rationale": "Advanced neuro-imaging requires documented objective focal neurological deficits.",
+    "appeal_guidelines": "Provide emergency department records or specialist consult notes confirming suspected acute intracranial pathology.",
+    "supported_diagnoses": null
+  },
+  {
+    "rule_id": 3,
+    "cpt_code": "99395",
+    "plan_id": "BCBS_PPO_01",
+    "pa_required": false,
+    "min_conservative_weeks": 0,
+    "red_flag_bypass_allowed": false,
+    "required_documents": [],
+    "denial_rationale": "Routine preventive wellness visits do not require prior authorization under ACA guidelines.",
+    "appeal_guidelines": null,
+    "supported_diagnoses": null
+  },
+  {
+    "rule_id": 5,
+    "cpt_code": "29881",
+    "plan_id": "BCBS_PPO_01",
+    "pa_required": true,
+    "min_conservative_weeks": 4,
+    "red_flag_bypass_allowed": true,
+    "required_documents": [
+      "Operative notes from previous interventions",
+      "MRI confirming meniscal pathology"
+    ],
+    "denial_rationale": "Knee arthroscopy requires documented structural defect on MRI.",
+    "appeal_guidelines": "Submit diagnostic imaging reports confirming mechanical failure.",
+    "supported_diagnoses": null
+  }
+]

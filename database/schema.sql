@@ -38,6 +38,7 @@ CREATE TABLE patients (
     oop_met_ytd NUMERIC(10, 2) NOT NULL DEFAULT 0.00
 );
 
+
 -- 4. Prior Authorization & Coverage Rules (CRD / DTR Engine)
 CREATE TABLE coverage_rules (
     rule_id SERIAL PRIMARY KEY,
@@ -48,5 +49,9 @@ CREATE TABLE coverage_rules (
     red_flag_bypass_allowed BOOLEAN DEFAULT TRUE,
     required_documents JSONB DEFAULT '[]'::jsonb,
     denial_rationale TEXT,
-    appeal_guidelines TEXT
+    appeal_guidelines TEXT,
+    supported_diagnoses JSONB DEFAULT NULL,
+
+    CONSTRAINT unique_procedure_plan_rule
+        UNIQUE (cpt_code, plan_id)
 );
